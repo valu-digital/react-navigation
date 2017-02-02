@@ -113,11 +113,12 @@ export default (
             routeName: initialRouteName,
             params: initialRouteParams,
           }));
+        } else {
+          route.params = initialRouteParams;
         }
         route = {
           ...route,
           routeName: initialRouteName,
-          params: initialRouteParams,
           key: 'Init',
         };
         state = {
