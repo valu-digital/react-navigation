@@ -117,6 +117,7 @@ export default (
         route = {
           ...route,
           routeName: initialRouteName,
+          params: initialRouteParams,
           key: 'Init',
         };
         state = {
