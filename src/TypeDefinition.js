@@ -254,7 +254,9 @@ export type NavigationStackViewConfig = {
   mode?: 'card' | 'modal',
   headerMode?: HeaderMode,
   headerComponent?: ReactClass<HeaderProps>,
-  cardStyle?: Object
+  cardStyle?: Style,
+  onTransitionStart?: () => void,
+  onTransitionEnd?: () => void
 };
 
 export type NavigationStackRouterConfig = {
