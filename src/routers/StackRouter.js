@@ -114,7 +114,7 @@ export default (
             params: initialRouteParams,
           }));
         } else {
-          route.params = initialRouteParams;
+          route = {...route, params: initialRouteParams};
         }
         route = {
           ...route,
