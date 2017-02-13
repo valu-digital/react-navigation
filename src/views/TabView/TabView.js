@@ -88,11 +88,10 @@ class TabView extends PureComponent<void, Props, void> {
     const tabBar = this.props.router.getScreenConfig(this.props.childNavigationProps[route.key], 'tabBar');
     if (tabBar && typeof tabBar.label !== 'undefined') {
       return tabBar.label;
-    } else {
-      const title = this.props.router.getScreenConfig(this.props.childNavigationProps[route.key], 'title');
-      if (typeof title === 'string') {
-        return title;
-      }
+    }
+    const title = this.props.router.getScreenConfig(this.props.childNavigationProps[route.key], 'title');
+    if (typeof title === 'string') {
+      return title;
     }
     return route.routeName;
   };
@@ -157,7 +156,12 @@ class TabView extends PureComponent<void, Props, void> {
     let renderHeader;
     let renderFooter;
 
-    if (typeof tabBarComponent !== 'undefined') {
+    const { state } = this.props.navigation;
+    const tabBar = this.props.router.getScreenConfig(this.props.childNavigationProps[state.routes[state.index].key], 'tabBar');
+
+    const tabBarVisible = tabBar ? tabBar.visible !== false : true;
+
+    if (tabBarComponent !== undefined && tabBarVisible) {
       if (tabBarPosition === 'bottom') {
         renderFooter = this._renderTabBar;
       } else {

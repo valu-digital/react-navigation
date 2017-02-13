@@ -110,13 +110,15 @@ The following actions are supported:
 ```js
 import { NavigationActions } from 'react-navigation'
 
-NavigationActions.navigate({
+const navigationAction = NavigationActions.navigate({
   routeName: 'Profile',
   params: {},
 
   // navigate can have a nested navigate action that will be run inside the child router
   action: NavigationActions.navigate({ routeName: 'SubProfileRoute'})
 })
+this.props.navigation.dispatch(navigationAction)
+
 ```
 
 
@@ -127,9 +129,30 @@ The `Reset` action wipes the whole navigation state and replaces it with the res
 ```js
 import { NavigationActions } from 'react-navigation'
 
-NavigationActions.reset({
-  actions: NavigationActions.navigate({ routeName: 'Profile'}),
+const resetAction = NavigationActions.reset({
+  index: 0,
+  actions: [
+    NavigationActions.navigate({ routeName: 'Profile'})
+  ]
 })
+this.props.navigation.dispatch(resetAction)
+
+```
+
+You can issue multiple actions, but make sure to set `index` correctly:
+
+```js
+import { NavigationActions } from 'react-navigation'
+
+const resetAction = NavigationActions.reset({
+  index: 1,
+  actions: [
+    NavigationActions.navigate({ routeName: 'Profile'}),
+    NavigationActions.navigate({ routeName: 'Settings'})
+  ]
+})
+this.props.navigation.dispatch(resetAction)
+
 ```
 
 ### SetParams
@@ -139,9 +162,11 @@ When dispatching `SetParams`, the router will produce a new state that has chang
 ```js
 import { NavigationActions } from 'react-navigation'
 
-NavigationActions.setParams({
+const setParamsAction = NavigationActions.setParams({
   params: {}, // these are the new params that will be merged into the existing route params
   // The key of the route that should get the new params
   key: 'screen-123',
 })
+this.props.navigation.dispatch(setParamsAction)
+
 ```
