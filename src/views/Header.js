@@ -266,7 +266,7 @@ class Header extends React.Component<void, HeaderProps, void> {
       );
 
       appBar = (
-        <View style={styles.appBar}>
+        <View style={[styles.appBar, {height: barHeight}]}>
           {titleComponents}
           {leftComponents}
           {rightComponents}
@@ -286,7 +286,7 @@ class Header extends React.Component<void, HeaderProps, void> {
       });
 
       appBar = (
-        <View style={styles.appBar}>
+        <View style={[styles.appBar, {height: barHeight}]}>
           {titleComponent}
           {leftComponent}
           {rightComponent}
