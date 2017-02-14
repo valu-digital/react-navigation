@@ -106,7 +106,7 @@ export default (
             ],
           };
         }
-        
+
         let childState = {};
         if (initialChildRouter) {
           childState = initialChildRouter.getStateForAction(NavigationActions.navigate({
@@ -115,7 +115,7 @@ export default (
           }));
         }
 
-        route = {
+        let route = {
           ...childState,
           routeName: initialRouteName,
           params: initialRouteParams,
