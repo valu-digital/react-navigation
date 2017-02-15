@@ -285,7 +285,7 @@ class Header extends React.Component<void, HeaderProps, void> {
 
     return (
       <Animated.View {...rest} style={[styles.container, style]}>
-        <View style={{flex: 1}}>{children}</View>
+        <View style={styles.appBar}>{children}</View>
       </Animated.View>
     );
   }
@@ -303,6 +303,9 @@ const styles = StyleSheet.create({
       height: StyleSheet.hairlineWidth,
     },
     elevation: 4,
+  },
+  appBar: {
+    flex: 1
   },
   item: {
     flexDirection: 'row',
