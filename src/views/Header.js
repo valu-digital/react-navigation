@@ -58,11 +58,6 @@ class Header extends React.Component<void, HeaderProps, void> {
   static Title = HeaderTitle;
   static BackButton = HeaderBackButton;
 
-  static defaultProps = {
-    barHeight: APPBAR_HEIGHT,
-    statusBarHeight: STATUSBAR_HEIGHT,
-  };
-
   // propTypes for people who don't use Flow
   static propTypes = {
     ...NavigationPropTypes.SceneRendererProps,
@@ -71,8 +66,6 @@ class Header extends React.Component<void, HeaderProps, void> {
     renderRightComponent: PropTypes.func,
     renderTitleComponent: PropTypes.func,
     router: PropTypes.object,
-    barHeight: PropTypes.number,
-    statusBarHeight: PropTypes.number,
     style: PropTypes.any,
   };
 
@@ -240,9 +233,9 @@ class Header extends React.Component<void, HeaderProps, void> {
 
   render(): React.Element<*> {
     // eslint-disable-next-line no-unused-vars
-    const { scenes, scene, style, position, progress, barHeight, statusBarHeight, ...rest } = this.props;
+    const { scenes, scene, style, position, progress, ...rest } = this.props;
 
-    let appBar = null;
+    let children = null;
 
     if (this.props.mode === 'float') {
       // eslint-disable-next-line no-shadow
@@ -265,13 +258,11 @@ class Header extends React.Component<void, HeaderProps, void> {
         })
       );
 
-      appBar = (
-        <View style={[styles.appBar, {height: barHeight}]}>
-          {titleComponents}
-          {leftComponents}
-          {rightComponents}
-        </View>
-      );
+      children = [
+        titleComponents,
+        leftComponents,
+        rightComponents
+      ];
     } else {
       const staticRendererProps = {
         ...this.props,
@@ -285,18 +276,16 @@ class Header extends React.Component<void, HeaderProps, void> {
         hasRightComponent: !!rightComponent,
       });
 
-      appBar = (
-        <View style={[styles.appBar, {height: barHeight}]}>
-          {titleComponent}
-          {leftComponent}
-          {rightComponent}
-        </View>
-      );
+      children = [
+        titleComponent,
+        leftComponent,
+        rightComponent
+      ];
     }
 
     return (
-      <Animated.View {...rest} style={[styles.container, style, {paddingTop: statusBarHeight}]}>
-        {appBar}
+      <Animated.View {...rest} style={[styles.container, {marginTop: STATUSBAR_HEIGHT, height: APPBAR_HEIGHT}, style]}>
+        {children}
       </Animated.View>
     );
   }
