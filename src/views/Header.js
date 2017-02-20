@@ -332,7 +332,7 @@ const styles = StyleSheet.create({
       flex: 1,
       alignItems: 'flex-start',
     }
-    : null,
+    : {},
   left: {
     alignItems: 'flex-start',
   },
