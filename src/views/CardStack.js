@@ -53,7 +53,7 @@ type Props = {
   /**
    * Optional custom animation when transitioning between screens.
    */
-  configureTransition?: ConfigureCardStackTransition,
+  transitionConfig?: () => TransitionConfig,
 };
 
 type DefaultProps = {
@@ -101,7 +101,7 @@ class CardStack extends Component<DefaultProps, Props, void> {
     /**
      * Optional custom animation when transitioning between screens.
      */
-    configureTransition: PropTypes.func,
+    transitionConfig: PropTypes.func,
 
     /**
      * The navigation prop, including the state and the dispatcher for the back
@@ -264,7 +264,16 @@ class CardStack extends Component<DefaultProps, Props, void> {
     return configure(
       transitionProps,
       prevTransitionProps,
-      this.props.mode === 'modal');
+      this.props.mode === 'modal'
+    );
+    if (this.props.transitionConfig) {
+      return {
+        ...defaultConfig,
+        ...this.props.transitionConfig(),
+      };
+    }
+
+    return defaultConfig;
   }
 
   _renderInnerCard(
@@ -313,12 +322,13 @@ class CardStack extends Component<DefaultProps, Props, void> {
   _renderScene(props: NavigationSceneRendererProps): React.Element<*> {
     const isModal = this.props.mode === 'modal';
 
-    /* $FlowFixMe */
     const {
       screenInterpolator,
       gesturesEnabled,
       gestureResponseDistance,
+      /* $FlowFixMe */
     } = this._getTransitionConfig();
+
     const style = screenInterpolator && screenInterpolator(props);
 
     let panHandlers = null;

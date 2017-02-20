@@ -20,11 +20,11 @@ import addNavigationHelpers from '../addNavigationHelpers';
 import type {
   NavigationScene,
   NavigationRouter,
-  NavigationState,
   NavigationAction,
   NavigationScreenProp,
   NavigationSceneRendererProps,
   NavigationStyleInterpolator,
+  LayoutEvent,
   Style,
 } from '../TypeDefinition';
 
@@ -34,9 +34,9 @@ type SubViewProps = NavigationSceneRendererProps & {
   onNavigateBack?: () => void,
 };
 
-type Navigation = NavigationScreenProp<NavigationState, NavigationAction>;
+type Navigation = NavigationScreenProp<*, NavigationAction>;
 
-type SubViewRenderer = (subViewProps: SubViewProps) => ?React.Element<*>;
+type SubViewRenderer = (subViewProps: SubViewProps) => ?React.Element<any>;
 
 export type HeaderProps = NavigationSceneRendererProps & {
   mode: HeaderMode,
@@ -50,10 +50,16 @@ export type HeaderProps = NavigationSceneRendererProps & {
 
 type SubViewName = 'left' | 'title' | 'right';
 
+type HeaderState = {
+  widths: {
+    [key: number]: number,
+  },
+};
+
 const APPBAR_HEIGHT = Platform.OS === 'ios' ? 44 : 56;
 const STATUSBAR_HEIGHT = Platform.OS === 'ios' ? 20 : 0;
 
-class Header extends React.Component<void, HeaderProps, void> {
+class Header extends React.PureComponent<void, HeaderProps, HeaderState> {
 
   static Title = HeaderTitle;
   static BackButton = HeaderBackButton;
@@ -71,13 +77,9 @@ class Header extends React.Component<void, HeaderProps, void> {
 
   props: HeaderProps;
 
-  shouldComponentUpdate(nextProps: HeaderProps, nextState: any): boolean {
-    return ReactComponentWithPureRenderMixin.shouldComponentUpdate.call(
-      this,
-      nextProps,
-      nextState
-    );
-  }
+  state = {
+    widths: {},
+  };
 
   _getHeaderTitle(navigation: Navigation): ?string {
     const header = this.props.router.getScreenConfig(navigation, 'header');
@@ -88,6 +90,14 @@ class Header extends React.Component<void, HeaderProps, void> {
       title = this.props.router.getScreenConfig(navigation, 'title');
     }
     return typeof title === 'string' ? title : undefined;
+  }
+
+  _getBackButtonTitle(navigation: Navigation): ?string {
+    const header = this.props.router.getScreenConfig(navigation, 'header') || {};
+    if (header.backTitle === null) {
+      return undefined;
+    }
+    return header.backTitle || this._getHeaderTitle(navigation);
   }
 
   _getHeaderTintColor(navigation: Navigation): ?string {
@@ -110,7 +120,14 @@ class Header extends React.Component<void, HeaderProps, void> {
     const titleStyle = this._getHeaderTitleStyle(props.navigation);
     const color = this._getHeaderTintColor(props.navigation);
     const title = this._getHeaderTitle(props.navigation);
-    return <HeaderTitle style={[color ? { color } : null, titleStyle]}>{title}</HeaderTitle>;
+
+    return (
+      <HeaderTitle
+        style={[color ? { color } : null, titleStyle]}
+      >
+        {title}
+      </HeaderTitle>
+    );
   };
 
   _renderLeftComponent = (props: SubViewProps): ?React.Element<HeaderBackButton> => {
@@ -118,21 +135,16 @@ class Header extends React.Component<void, HeaderProps, void> {
       return null;
     }
     const tintColor = this._getHeaderTintColor(props.navigation);
-    // @todo(grabobu):
-    // We have implemented support for back button label (which works 100% fine),
-    // but when title is too long, it will overlap the <HeaderTitle />.
-    // We had to revert the PR implementing that because of Android issues,
-    // I will land it this week and re-enable that for next release.
-    //
-    // const previousNavigation = addNavigationHelpers({
-    //   ...props.navigation,
-    //   state: props.scenes[props.scene.index - 1].route,
-    // });
-    // const backButtonTitle = this._getHeaderTitle(previousNavigation);
+    const previousNavigation = addNavigationHelpers({
+      ...props.navigation,
+      state: props.scenes[props.scene.index - 1].route,
+    });
+    const backButtonTitle = this._getBackButtonTitle(previousNavigation);
     return (
       <HeaderBackButton
         onPress={props.onNavigateBack}
         tintColor={tintColor}
+        title={backButtonTitle}
       />
     );
   };
@@ -147,20 +159,9 @@ class Header extends React.Component<void, HeaderProps, void> {
       HeaderStyleInterpolator.forLeft,
     );
 
-  _renderTitle = (props: NavigationSceneRendererProps, options: *): ?React.Element<*> => {
-    const style = {};
-
-    if (Platform.OS === 'android') {
-      if (!options.hasLeftComponent) {
-        style.left = 0;
-      }
-      if (!options.hasRightComponent) {
-        style.right = 0;
-      }
-    }
-
+  _renderTitle(props: NavigationSceneRendererProps): ?React.Element<*> {
     return this._renderSubView(
-      { ...props, style },
+      props,
       'title',
       this.props.renderTitleComponent,
       this._renderTitleComponent,
@@ -211,16 +212,34 @@ class Header extends React.Component<void, HeaderProps, void> {
       subView = defaultRenderer(subViewProps);
     }
 
-    if (subView === null) {
-      return null;
-    }
-
     const pointerEvents = offset !== 0 || isStale ? 'none' : 'box-none';
+
+    // On iOS, width of left/right components depends on the calculated
+    // size of the title.
+    const onLayoutIOS = name === 'title'
+      ? (e: LayoutEvent) => {
+        this.setState({
+          widths: {
+            ...this.state.widths,
+            [index]: e.nativeEvent.layout.width,
+          },
+        });
+      }
+      : undefined;
+
+    const titleWidth = name === 'left' || name === 'right'
+      ? this.state.widths[index]
+      : undefined;
+
     return (
       <Animated.View
         pointerEvents={pointerEvents}
+        onLayout={onLayoutIOS}
         key={`${name}_${key}`}
         style={[
+          titleWidth && {
+            width: (props.layout.initWidth - titleWidth) / 2,
+          },
           styles.item,
           styles[name],
           styleInterpolator(props),
@@ -231,49 +250,44 @@ class Header extends React.Component<void, HeaderProps, void> {
     );
   }
 
-  render(): React.Element<*> {
-    // eslint-disable-next-line no-unused-vars
-    const { scenes, scene, style, position, progress, ...rest } = this.props;
+  _renderHeader(props: NavigationSceneRendererProps): React.Element<*> {
+    const left = this._renderLeft(props);
+    const right = this._renderRight(props);
+    const title = this._renderTitle(props);
 
-    let children = null;
+    return (
+      <View
+        style={[StyleSheet.absoluteFill, styles.header]}
+        key={`scene_${props.scene.key}`}
+      >
+        {left}
+        {title}
+        {right}
+      </View>
+    );
+  }
+
+  render() {
+    let appBar;
 
     if (this.props.mode === 'float') {
-      // eslint-disable-next-line no-shadow
-      const scenesProps = (scenes.map((scene: NavigationScene, index: number) => {
-        const props = NavigationPropTypes.extractSceneRendererProps(this.props);
-        props.scene = scene;
-        props.index = index;
-        props.navigation = addNavigationHelpers({
-          ...this.props.navigation,
-          state: scene.route,
-        });
-        return props;
-      }): Array<NavigationSceneRendererProps>);
-      const leftComponents = scenesProps.map(this._renderLeft, this);
-      const rightComponents = scenesProps.map(this._renderRight, this);
-      const titleComponents = scenesProps.map((props: *, i: number) =>
-        this._renderTitle(props, {
-          hasLeftComponent: leftComponents && !!leftComponents[i],
-          hasRightComponent: rightComponents && !!rightComponents[i],
-        })
-      );
+      const scenesProps: Array<NavigationSceneRendererProps> = this.props.scenes
+        .map((scene: NavigationScene, index: number) => ({
+          ...NavigationPropTypes.extractSceneRendererProps(this.props),
+          scene,
+          index,
+          navigation: addNavigationHelpers({
+            ...this.props.navigation,
+            state: scene.route,
+          }),
+        }));
 
-      children = [
-        titleComponents,
-        leftComponents,
-        rightComponents
-      ];
+      appBar = scenesProps.map(this._renderHeader, this);
     } else {
-      const staticRendererProps = {
+      appBar = this._renderHeader({
         ...this.props,
-        position: new Animated.Value(scene.index),
+        position: new Animated.Value(this.props.scene.index),
         progress: new Animated.Value(0),
-      };
-      const leftComponent = this._renderLeft(staticRendererProps);
-      const rightComponent = this._renderRight(staticRendererProps);
-      const titleComponent = this._renderTitle(staticRendererProps, {
-        hasLeftComponent: !!leftComponent,
-        hasRightComponent: !!rightComponent,
       });
 
       children = [
@@ -283,9 +297,14 @@ class Header extends React.Component<void, HeaderProps, void> {
       ];
     }
 
+    // eslint-disable-next-line no-unused-vars
+    const { scenes, scene, style, position, progress, ...rest } = this.props;
+
     return (
       <Animated.View {...rest} style={[styles.container, style]}>
-        <View style={styles.appBar}>{children}</View>
+        <View style={styles.appBar}>
+          {appBar}
+        </View>
       </Animated.View>
     );
   }
@@ -296,6 +315,7 @@ const styles = StyleSheet.create({
     paddingTop: STATUSBAR_HEIGHT,
     height: STATUSBAR_HEIGHT + APPBAR_HEIGHT,
     backgroundColor: Platform.OS === 'ios' ? '#EFEFF2' : '#FFF',
+    height: STATUSBAR_HEIGHT + APPBAR_HEIGHT,
     shadowColor: 'black',
     shadowOpacity: 0.1,
     shadowRadius: StyleSheet.hairlineWidth,
@@ -305,30 +325,25 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   appBar: {
-    flex: 1
+    flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
   },
   item: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    justifyContent: 'center',
   },
-  title: {
-    bottom: 0,
-    left: 40,
-    position: 'absolute',
-    right: 40,
-    top: 0,
-  },
+  title: Platform.OS === 'android'
+    ? {
+      flex: 1,
+      alignItems: 'flex-start',
+    }
+    : null,
   left: {
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-    top: 0,
+    alignItems: 'flex-start',
   },
   right: {
-    bottom: 0,
-    position: 'absolute',
-    right: 0,
-    top: 0,
+    alignItems: 'flex-end',
   },
 });
 

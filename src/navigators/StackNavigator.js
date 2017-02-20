@@ -31,7 +31,7 @@ export default (
     headerMode,
     mode,
     cardStyle,
-    configureTransition,
+    transitionConfig,
     onTransitionStart,
     onTransitionEnd,
     navigationOptions
@@ -43,19 +43,16 @@ export default (
     navigationOptions
   };
   const router = StackRouter(routeConfigMap, stackRouterConfig);
-  return createNavigationContainer(
-    createNavigator(router)(props => (
-      <CardStack
-        {...props}
-        headerComponent={headerComponent}
-        headerMode={headerMode}
-        mode={mode}
-        cardStyle={cardStyle}
-        configureTransition={configureTransition}
-        onTransitionStart={onTransitionStart}
-        onTransitionEnd={onTransitionEnd}
-      />
-    )),
-    containerOptions
-  );
+  return createNavigationContainer(createNavigator(router)(props => (
+    <CardStack
+      {...props}
+      headerComponent={headerComponent}
+      headerMode={headerMode}
+      mode={mode}
+      cardStyle={cardStyle}
+      transitionConfig={transitionConfig}
+      onTransitionStart={onTransitionStart}
+      onTransitionEnd={onTransitionEnd}
+    />
+  )), containerOptions);
 };

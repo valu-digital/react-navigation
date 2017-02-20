@@ -10,6 +10,7 @@ import type {
   HeaderMode,
   HeaderProps,
 } from './views/Header';
+import type { TransitionConfig } from './views/TransitionConfigs';
 
 import type { ConfigureCardStackTransition } from './views/TransitionConfigs';
 
@@ -264,7 +265,7 @@ export type NavigationStackViewConfig = {
   headerMode?: HeaderMode,
   headerComponent?: ReactClass<HeaderProps<*>>,
   cardStyle?: Style,
-  configureTransition?: ConfigureCardStackTransition,
+  transitionConfig?: () => TransitionConfig,
   onTransitionStart?: () => void,
   onTransitionEnd?: () => void
 };
@@ -439,3 +440,14 @@ export type NavigationSceneRenderer = (
 export type NavigationStyleInterpolator = (
   props: NavigationSceneRendererProps,
 ) => Style;
+
+export type LayoutEvent = {
+  nativeEvent: {
+    layout: {
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+    },
+  };
+};
