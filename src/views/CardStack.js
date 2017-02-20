@@ -50,7 +50,6 @@ type Props = {
   onTransitionStart?: () => void,
   onTransitionEnd?: () => void,
   style: Style,
-  gestureResponseDistance?: ?number,
   /**
    * Optional custom animation when transitioning between screens.
    */
@@ -98,12 +97,6 @@ class CardStack extends Component<DefaultProps, Props, void> {
      * Default value is `card`.
      */
     mode: PropTypes.oneOf(['card', 'modal']),
-
-    /**
-     * The distance from the edge of the card which gesture response can start
-     * for. Default value is `30`.
-     */
-    gestureResponseDistance: PropTypes.number,
 
     /**
      * Optional custom animation when transitioning between screens.
@@ -262,7 +255,7 @@ class CardStack extends Component<DefaultProps, Props, void> {
     // props for the new screen
     transitionProps: NavigationTransitionProps,
     // props for the old screen
-    prevTransitionProps: NavigationTransitionProps
+    prevTransitionProps: NavigationTransitionProps,
   ): TransitionConfig {
     const configure =
       this.props.configureTransition ||
@@ -321,7 +314,11 @@ class CardStack extends Component<DefaultProps, Props, void> {
     const isModal = this.props.mode === 'modal';
 
     /* $FlowFixMe */
-    const { screenInterpolator, gesturesEnabled } = this._getTransitionConfig();
+    const {
+      screenInterpolator,
+      gesturesEnabled,
+      gestureResponseDistance,
+    } = this._getTransitionConfig();
     const style = screenInterpolator && screenInterpolator(props);
 
     let panHandlers = null;
@@ -336,7 +333,7 @@ class CardStack extends Component<DefaultProps, Props, void> {
       const panHandlersProps = {
         ...props,
         onNavigateBack,
-        gestureResponseDistance: this.props.gestureResponseDistance,
+        gestureResponseDistance,
       };
       panHandlers = isModal ?
         CardStackPanResponder.forVertical(panHandlersProps) :
