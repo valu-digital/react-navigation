@@ -11,6 +11,8 @@ import type {
   HeaderProps,
 } from './views/Header';
 
+import type { ConfigureCardStackTransition } from './views/TransitionConfigs';
+
 /**
  * NavigationState is a tree of routes for a single navigator, where each child
  * route may either be a NavigationScreenRoute or a NavigationRouterRoute.
@@ -262,6 +264,7 @@ export type NavigationStackViewConfig = {
   headerMode?: HeaderMode,
   headerComponent?: ReactClass<HeaderProps<*>>,
   cardStyle?: Style,
+  configureTransition?: ConfigureCardStackTransition,
   onTransitionStart?: () => void,
   onTransitionEnd?: () => void
 };

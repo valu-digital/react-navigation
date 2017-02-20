@@ -33,7 +33,7 @@ import type {
   HeaderMode,
 } from './Header';
 
-import type { TransitionConfig } from './TransitionConfigs';
+import type { TransitionConfig, ConfigureCardStackTransition } from './TransitionConfigs';
 
 import TransitionConfigs from './TransitionConfigs';
 
@@ -59,7 +59,7 @@ type Props = {
   /**
    * Optional custom animation when transitioning between screens.
    */
-  transitionConfig?: TransitionConfig,
+  configureTransition?: ConfigureCardStackTransition,
 };
 
 type DefaultProps = {
@@ -114,7 +114,7 @@ class CardStack extends Component<DefaultProps, Props, void> {
     /**
      * Optional custom animation when transitioning between screens.
      */
-    transitionConfig: PropTypes.func,
+    configureTransition: PropTypes.func,
 
     /**
      * Enable gestures. Default value is true on iOS, false on Android.
@@ -276,19 +276,14 @@ class CardStack extends Component<DefaultProps, Props, void> {
     // props for the old screen
     prevTransitionProps: NavigationTransitionProps
   ): TransitionConfig {
-    const defaultConfig = TransitionConfigs.defaultTransitionConfig(
+    const configure =
+      this.props.configureTransition ||
+      TransitionConfigs.defaultTransitionConfig;
+
+    return configure(
       transitionProps,
       prevTransitionProps,
-      this.props.mode === 'modal'
-    );
-    if (this.props.transitionConfig) {
-      return {
-        ...this.props.transitionConfig,
-        ...defaultConfig,
-      };
-    }
-
-    return defaultConfig;
+      this.props.mode === 'modal');
   }
 
   _renderInnerCard(

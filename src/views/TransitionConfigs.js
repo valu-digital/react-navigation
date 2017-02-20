@@ -15,6 +15,15 @@ import {
   Platform,
 } from 'react-native';
 
+export type ConfigureCardStackTransition = (
+  // props for the new screen
+  transitionProps: NavigationTransitionProps,
+  // props for the old screen
+  prevTransitionProps: NavigationTransitionProps,
+  // whether we're animating in/out a modal screen
+  isModal: boolean,
+) => TransitionConfig;
+
 /**
  * Describes a visual transition from one screen to another.
  */
