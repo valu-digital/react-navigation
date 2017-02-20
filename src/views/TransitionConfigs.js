@@ -35,6 +35,9 @@ export type TransitionConfig = {
   screenInterpolator?: NavigationSceneRendererProps => Object,
   // Enable transition gestures (such as swipe right to go back)
   gesturesEnabled: boolean,
+  // The distance (in pixels) from the edge of the card which gesture response can start
+  // for. Default value is `30`.
+  gestureResponseDistance?: number,
 };
 
 // Used for all animations unless overriden
