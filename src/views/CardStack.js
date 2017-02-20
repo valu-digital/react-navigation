@@ -50,9 +50,7 @@ type Props = {
   onTransitionStart?: () => void,
   onTransitionEnd?: () => void,
   style: Style,
-  /**
-   * Optional custom animation when transitioning between screens.
-   */
+  // Optional custom animation when transitioning between screens.
   transitionConfig?: () => TransitionConfig,
 };
 
@@ -255,13 +253,9 @@ class CardStack extends Component<DefaultProps, Props, void> {
     // props for the new screen
     transitionProps: NavigationTransitionProps,
     // props for the old screen
-    prevTransitionProps: NavigationTransitionProps,
+    prevTransitionProps: NavigationTransitionProps
   ): TransitionConfig {
-    const configure =
-      this.props.configureTransition ||
-      TransitionConfigs.defaultTransitionConfig;
-
-    return configure(
+    const defaultConfig = TransitionConfigs.defaultTransitionConfig(
       transitionProps,
       prevTransitionProps,
       this.props.mode === 'modal'
@@ -326,7 +320,6 @@ class CardStack extends Component<DefaultProps, Props, void> {
       screenInterpolator,
       gesturesEnabled,
       gestureResponseDistance,
-      /* $FlowFixMe */
     } = this._getTransitionConfig();
 
     const style = screenInterpolator && screenInterpolator(props);
