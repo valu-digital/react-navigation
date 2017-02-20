@@ -289,12 +289,6 @@ class Header extends React.PureComponent<void, HeaderProps, HeaderState> {
         position: new Animated.Value(this.props.scene.index),
         progress: new Animated.Value(0),
       });
-
-      children = [
-        titleComponent,
-        leftComponent,
-        rightComponent
-      ];
     }
 
     // eslint-disable-next-line no-unused-vars
