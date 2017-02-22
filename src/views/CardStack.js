@@ -50,7 +50,10 @@ type Props = {
   onTransitionStart?: () => void,
   onTransitionEnd?: () => void,
   style: Style,
-  // Optional custom animation when transitioning between screens.
+  gestureResponseDistance?: ?number,
+  /**
+   * Optional custom animation when transitioning between screens.
+   */
   transitionConfig?: () => TransitionConfig,
 };
 
@@ -318,7 +321,6 @@ class CardStack extends Component<DefaultProps, Props, void> {
 
     const {
       screenInterpolator,
-      gesturesEnabled,
       gestureResponseDistance,
     } = this._getTransitionConfig();
 
@@ -326,6 +328,17 @@ class CardStack extends Component<DefaultProps, Props, void> {
 
     let panHandlers = null;
 
+    const cardStackConfig = this.props.router.getScreenConfig(
+      props.navigation,
+      'cardStack'
+    ) || {};
+
+    // On iOS, the default behavior is to allow the user to pop a route by
+    // swiping the corresponding Card away. On Android this is off by default
+    const gesturesEnabledConfig = cardStackConfig.gesturesEnabled;
+    const gesturesEnabled = typeof gesturesEnabledConfig === 'boolean' ?
+      gesturesEnabledConfig :
+      Platform.OS === 'ios';
     if (gesturesEnabled) {
       let onNavigateBack = null;
       if (this.props.navigation.state.index !== 0) {

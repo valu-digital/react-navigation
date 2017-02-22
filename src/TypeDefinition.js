@@ -170,6 +170,14 @@ export type DrawerConfig = {
   label?: string;
 };
 
+export type CardStackConfig = {
+  /**
+   * Whether you can use gestures to dismiss this screen.
+   * Defaults to true on iOS, false on Android.
+   */
+  gesturesEnabled?: bool;
+};
+
 export type NavigationScreenOptions = {
   /**
    * Title is rendered by certain navigators, e.g. the tab navigator,
@@ -188,6 +196,10 @@ export type NavigationScreenOptions = {
    * Options passed to the drawer for this screen.
    */
   drawer?: NavigationScreenOption<DrawerConfig>;
+  /**
+   * Options passed to the card stack for this screen.
+   */
+  cardStack?: NavigationScreenOption<CardStackConfig>;
 };
 
 export type NavigationScreenConfig = {
@@ -238,6 +250,7 @@ export type NavigationSetParamsAction = {
 
 export type NavigationInitAction = {
   type: 'Navigation/INIT',
+  params?: NavigationParams,
 };
 
 export type NavigationResetAction = {

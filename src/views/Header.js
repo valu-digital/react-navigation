@@ -326,6 +326,7 @@ const styles = StyleSheet.create({
   },
   item: {
     justifyContent: 'center',
+    backgroundColor: 'transparent',
   },
   title: Platform.OS === 'android'
     ? {

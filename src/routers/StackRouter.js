@@ -94,6 +94,7 @@ export default (
 
       // Set up the initial state if needed
       if (!state) {
+        let route = {};
         if (action.type === NavigationActions.NAVIGATE && (childRouters[action.routeName] !== undefined)) {
           return {
             index: 0,
@@ -106,20 +107,24 @@ export default (
             ],
           };
         }
-
-        let childState = {};
         if (initialChildRouter) {
-          childState = initialChildRouter.getStateForAction(NavigationActions.navigate({
+          route = initialChildRouter.getStateForAction(NavigationActions.navigate({
             routeName: initialRouteName,
             params: initialRouteParams,
           }));
+        } else {
+          route = {...route, params: initialRouteParams};
         }
 
-        let route = {
-          ...childState,
+        const params = (route.params || action.params) && {
+          ...(route.params || {}),
+          ...(action.params || {}),
+        };
+        route = {
+          ...route,
           routeName: initialRouteName,
-          params: initialRouteParams,
           key: 'Init',
+          ...(params ? { params } : {}),
         };
         state = {
           index: 0,
@@ -142,9 +147,10 @@ export default (
         const childRouter = childRouters[action.routeName];
         let route;
         if (childRouter) {
+          const childAction = action.action || NavigationActions.init({ params: action.params });
           route = {
             ...action,
-            ...childRouter.getStateForAction(action.action || NavigationActions.init()),
+            ...childRouter.getStateForAction(childAction),
             key: _getUuid(),
             routeName: action.routeName,
           };
