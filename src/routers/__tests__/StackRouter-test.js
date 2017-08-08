@@ -278,6 +278,7 @@ describe('StackRouter', () => {
         {
           key: 'Init',
           routeName: 'Foo',
+          params: {},
         },
       ],
     });
@@ -293,6 +294,7 @@ describe('StackRouter', () => {
         {
           key: 'Init',
           routeName: 'Foo',
+          params: {},
         },
       ],
     });
@@ -321,6 +323,7 @@ describe('StackRouter', () => {
         {
           key: 'Init',
           routeName: 'Foo',
+          params: {},
         },
       ],
     });
@@ -336,6 +339,7 @@ describe('StackRouter', () => {
         {
           key: 'Init',
           routeName: 'Foo',
+          params: {},
         },
       ],
     });
@@ -379,6 +383,27 @@ describe('StackRouter', () => {
         {
           key: 'Init',
           routeName: 'Bar',
+          params: {},
+        },
+      ],
+    });
+  });
+
+  test('Initial route params appear in nav state', () => {
+    const FooScreen = () => <div />;
+    const router = StackRouter({
+      Foo: {
+        screen: FooScreen,
+      },
+    }, { initialRouteName: 'Bar', initialRouteParams: { foo: 'bar' } });
+    const state = router.getStateForAction({ type: NavigationActions.INIT });
+    expect(state).toEqual({
+      index: 0,
+      routes: [
+        {
+          key: 'Init',
+          routeName: 'Bar',
+          params: { foo: 'bar' },
         },
       ],
     });

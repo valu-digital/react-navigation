@@ -107,6 +107,7 @@ export default (
             ],
           };
         }
+
         if (initialChildRouter) {
           route = initialChildRouter.getStateForAction(NavigationActions.navigate({
             routeName: initialRouteName,
@@ -118,10 +119,12 @@ export default (
           ...(action.params || {}),
           ...(initialRouteParams || {}),
         };
+
         route = {
           ...route,
           routeName: initialRouteName,
           key: 'Init',
+          params: initialRouteParams,
           ...(params ? { params } : {}),
         };
         state = {
